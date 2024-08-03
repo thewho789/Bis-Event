@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+    <link rel="stylesheet" href="THE Site Design.css">
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            <h1>Robo Soccer</h1>
+            <nav>
+                <ul>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#Design">Design</a></li>
+                    <li><a href="#Circuit">Circuit</a></li>
+                    <li><a href="#Codes">Bot Codes</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <section id="about">
+            <h2>About Bot</h2>
+            <p><b>Objective:</b> To design and build a remote-controlled car capable of playing robo soccer, utilizing Arduino, Bluetooth communication, and precise motor control.</p>
+            <pre><b>Key Features:</b>
+<b>Arduino-Powered Control:</b> The car is controlled by an Arduino UNO, which processes inputs from a Bluetooth 
+module and translates them into motor and servo actions.
+
+<b>Bluetooth Connectivity:</b> The HC-05 Bluetooth module allows wireless control via a smartphone app, enabling 
+real-time commands for forward, backward, left, right, stop, and kick actions.
+
+<b>Motor Driver Integration:</b> The L293D motor driver shield provides efficient control of four motors, ensuring 
+agility and speed on the field.
+
+<b>Servo Mechanism:</b> A servo motor is used to kick the ball, giving the car the ability to interact dynamically 
+with the game environment.</pre>
+        </section>
+
+        <section id="Design">
+            <h2>Design</h2>
+            <p><b>Inspiration</b></p>
+            <pre>                                                           Just For Idea
+<img src="Design 1.png"width=300>          <img src="Screenshot 2024-08-03 202247.png"width=400></pre>
+            <pre><b><b>Benefits of Using Soft Foam on the Sides of the Soccer Bot</b></b>
+<ol><li>Enhanced Safety</li>
+<li>Improved Durability</li>
+<li>Comfort and Aesthetics</li></ol></pre>
+
+<pre><b>Outer Design for Robo Soccer Car:</b>
+    Our Robo Soccer Car features a unique and functional outer design inspired by the floating
+    football concept, integrating advanced robotics for a competitive edge.
+<ol><li><b>Soft Foam Sides:</b><ul><li>The car is surrounded by soft foam, enhancing safety by minimizing impact during collisions.</li><li>This foam also improves durability by absorbing shocks and reducing wear and tear.</li><li>It ensures smooth gliding over surfaces and reduces noise, making the car ideal for indoor play.</li>
+</ul></li><li><b>Compact and Sturdy Build:</b><ul><li>The motor driver shield is mounted on top of the Arduino UNO, streamlining the assembly process
+and protecting the internal components.</li><li>Four motors are securely attached to provide precise and agile movements, essential for quick 
+maneuvers during the game.</li></ul></li>
+<li><b>Servo Kicker:</b><ul><li>A strategically positioned servo motor acts as a kicker, enabling the car to push the ball 
+forward and interact dynamically with the game environment.</li></ul></li></ol></pre>
+        </section>
+
+        <section id="Circuit">
+            <h2>Circuit Design:</h2>
+            <pre>
+    <ul><li><b>Arduino UNO:</b><ol><li>Connect the VCC to 5V.</li><li>Connect the GND to GND.</li></ol></li><li><b>L293D Motor Driver:</b><li>Enable Pins (EN1 and EN2) to Arduino digital pins (e.g., pin 9 for EN1 and pin 10 for EN2).</li><li><b>Input Pins:</b><ol><li>IN1 to Arduino digital pin 2.</li><li>IN2 to Arduino digital pin 3.</li><li>IN3 to Arduino digital pin 4.</li><li>IN4 to Arduino digital pin 5.</li></ol></li><li><b>Output Pins:</b><ol><li>OUT1 and OUT2 to the first motor.</li><li>OUT3 and OUT4 to the second motor.</li></ol></li><li><b>Power Pins:</b><ol><li>VCC1 (logic) to Arduino 5V.</li><li>VCC2 (motor power) to an external power source (e.g., 9V battery).</li><li>GND to GND.</li></ol></li><li><b>HC-05 Bluetooth Module:</b><ol><li>VCC to Arduino 5V.</li><li>GND to GND.</li><li>TXD to Arduino RX (pin 0).</li><li>RXD to Arduino TX (pin 1).</li></ol><li><b>Motors:</b><ol><li>Connect two motors to OUT1 and OUT2 of L293D.</li><li>Connect the other two motors to OUT3 and OUT4 of L293D.</li></ol></li><li><b>Servo:</b><ol><li>VCC to Arduino 5V.</li><li>GND to GND.</li><li>Signal pin to Arduino digital pin 6.</li></ol></li></ul></pre>
+        </section>
+
+        <section id="Codes">
+            <h2>Codes</h2><pre>
+                #include servo.h //start and end servo.h with <>
+
+                Servo myservo;
+                
+                // Motor A connections
+                const int motorA1 = 2;
+                const int motorA2 = 3;
+                const int enableA = 9;
+                
+                // Motor B connections
+                const int motorB1 = 4;
+                const int motorB2 = 5;
+                const int enableB = 10;
+                
+                // Servo connection
+                const int servoPin = 6;
+                
+                // Bluetooth module variables
+                char command;
+                
+                void setup() {
+                  // Set motor pins as output
+                  pinMode(motorA1, OUTPUT);
+                  pinMode(motorA2, OUTPUT);
+                  pinMode(enableA, OUTPUT);
+                  pinMode(motorB1, OUTPUT);
+                  pinMode(motorB2, OUTPUT);
+                  pinMode(enableB, OUTPUT);
+                
+                  // Attach servo
+                  myservo.attach(servoPin);
+                
+                  // Set initial servo position
+                  myservo.write(90);
+                
+                  // Initialize Serial communication
+                  Serial.begin(9600);
+                }
+                
+                void loop() {
+                  if (Serial.available()) {
+                    command = Serial.read();
+                    executeCommand(command);
+                  }
+                }
+                
+                void executeCommand(char command) {
+                  switch (command) {
+                    case 'F': // Move forward
+                      moveForward();
+                      break;
+                    case 'B': // Move backward
+                      moveBackward();
+                      break;
+                    case 'L': // Turn left
+                      turnLeft();
+                      break;
+                    case 'R': // Turn right
+                      turnRight();
+                      break;
+                    case 'S': // Stop
+                      stopMotors();
+                      break;
+                    case 'K': // Kick ball (move servo)
+                      kickBall();
+                      break;
+                    default:
+                      stopMotors();
+                      break;
+                  }
+                }
+                
+                void moveForward() {
+                  digitalWrite(motorA1, HIGH);
+                  digitalWrite(motorA2, LOW);
+                  analogWrite(enableA, 255);
+                
+                  digitalWrite(motorB1, HIGH);
+                  digitalWrite(motorB2, LOW);
+                  analogWrite(enableB, 255);
+                }
+                
+                void moveBackward() {
+                  digitalWrite(motorA1, LOW);
+                  digitalWrite(motorA2, HIGH);
+                  analogWrite(enableA, 255);
+                
+                  digitalWrite(motorB1, LOW);
+                  digitalWrite(motorB2, HIGH);
+                  analogWrite(enableB, 255);
+                }
+                
+                void turnLeft() {
+                  digitalWrite(motorA1, LOW);
+                  digitalWrite(motorA2, HIGH);
+                  analogWrite(enableA, 255);
+                
+                  digitalWrite(motorB1, HIGH);
+                  digitalWrite(motorB2, LOW);
+                  analogWrite(enableB, 255);
+                }
+                
+                void turnRight() {
+                  digitalWrite(motorA1, HIGH);
+                  digitalWrite(motorA2, LOW);
+                  analogWrite(enableA, 255);
+                
+                  digitalWrite(motorB1, LOW);
+                  digitalWrite(motorB2, HIGH);
+                  analogWrite(enableB, 255);
+                }
+                
+                void stopMotors() {
+                  digitalWrite(motorA1, LOW);
+                  digitalWrite(motorA2, LOW);
+                  analogWrite(enableA, 0);
+                
+                  digitalWrite(motorB1, LOW);
+                  digitalWrite(motorB2, LOW);
+                  analogWrite(enableB, 0);
+                }
+                
+                void kickBall() {
+                  myservo.write(0); // Move servo to kick position
+                  delay(500); // Hold position for a while
+                  myservo.write(90); // Move servo back to initial position
+                }
+                #include <Servo.h>
+
+                    Servo myservo;
+                    
+                    // Motor A connections
+                    const int motorA1 = 2;
+                    const int motorA2 = 3;
+                    const int enableA = 9;
+                    
+                    // Motor B connections
+                    const int motorB1 = 4;
+                    const int motorB2 = 5;
+                    const int enableB = 10;
+                    
+                    // Servo connection
+                    const int servoPin = 6;
+                    
+                    // Bluetooth module variables
+                    char command;
+                    
+                    void setup() {
+                      // Set motor pins as output
+                      pinMode(motorA1, OUTPUT);
+                      pinMode(motorA2, OUTPUT);
+                      pinMode(enableA, OUTPUT);
+                      pinMode(motorB1, OUTPUT);
+                      pinMode(motorB2, OUTPUT);
+                      pinMode(enableB, OUTPUT);
+                    
+                      // Attach servo
+                      myservo.attach(servoPin);
+                    
+                      // Set initial servo position
+                      myservo.write(90);
+                    
+                      // Initialize Serial communication
+                      Serial.begin(9600);
+                    }
+                    
+                    void loop() {
+                      if (Serial.available()) {
+                        command = Serial.read();
+                        executeCommand(command);
+                      }
+                    }
+                    
+                    void executeCommand(char command) {
+                      switch (command) {
+                        case 'F': // Move forward
+                          moveForward();
+                          break;
+                        case 'B': // Move backward
+                          moveBackward();
+                          break;
+                        case 'L': // Turn left
+                          turnLeft();
+                          break;
+                        case 'R': // Turn right
+                          turnRight();
+                          break;
+                        case 'S': // Stop
+                          stopMotors();
+                          break;
+                        case 'K': // Kick ball (move servo)
+                          kickBall();
+                          break;
+                        default:
+                          stopMotors();
+                          break;
+                      }
+                    }
+                    
+                    void moveForward() {
+                      digitalWrite(motorA1, HIGH);
+                      digitalWrite(motorA2, LOW);
+                      analogWrite(enableA, 255);
+                    
+                      digitalWrite(motorB1, HIGH);
+                      digitalWrite(motorB2, LOW);
+                      analogWrite(enableB, 255);
+                    }
+                    
+                    void moveBackward() {
+                      digitalWrite(motorA1, LOW);
+                      digitalWrite(motorA2, HIGH);
+                      analogWrite(enableA, 255);
+                    
+                      digitalWrite(motorB1, LOW);
+                      digitalWrite(motorB2, HIGH);
+                      analogWrite(enableB, 255);
+                    }
+                    
+                    void turnLeft() {
+                      digitalWrite(motorA1, LOW);
+                      digitalWrite(motorA2, HIGH);
+                      analogWrite(enableA, 255);
+                    
+                      digitalWrite(motorB1, HIGH);
+                      digitalWrite(motorB2, LOW);
+                      analogWrite(enableB, 255);
+                    }
+                    
+                    void turnRight() {
+                      digitalWrite(motorA1, HIGH);
+                      digitalWrite(motorA2, LOW);
+                      analogWrite(enableA, 255);
+                    
+                      digitalWrite(motorB1, LOW);
+                      digitalWrite(motorB2, HIGH);
+                      analogWrite(enableB, 255);
+                    }
+                    
+                    void stopMotors() {
+                      digitalWrite(motorA1, LOW);
+                      digitalWrite(motorA2, LOW);
+                      analogWrite(enableA, 0);
+                    
+                      digitalWrite(motorB1, LOW);
+                      digitalWrite(motorB2, LOW);
+                      analogWrite(enableB, 0);
+                    }
+                    
+                    void kickBall() {
+                      myservo.write(0); // Move servo to kick position
+                      delay(500); // Hold position for a while
+                      myservo.write(90); // Move servo back to initial position
+                    }
+                    </pre>
+        </section>
+
+        
+    </div>
+    <footer>
+        <p>&copy; 2024 My Portfolio</p>
+    </footer>
+</body>
+</html>
